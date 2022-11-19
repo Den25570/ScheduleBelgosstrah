@@ -156,30 +156,25 @@ function create_schedule() {
 
 function add_schedule_to_xlsx(schedule) {
    const res_file_name = './result.xlsx';
-   fs.copyFile(config.file_name, res_file_name, (err) => {
-      if (err) throw err;
-      console.log('OG workbook was copied');
-   });
+   fs.copyFile(config.file_name, res_file_name);
 
    const new_workbook = XLSX.readFile(res_file_name);
 
    for (let r = config.names_id[0].r; r <= config.names_id[1].r; r++) {
+      let i = r - config.names_id[0].r;
       for (let c = config.days_id[0].c; c <= config.days_id[1].c; c++) {
+         let j = c - config.days_id[0].c;
          let cell_id = XLSX.utils.encode_cell({ r: r, c: c })
 
          new_workbook.Sheets[config.schedule_sheet_name][cell_id] = {
-               h: schedule[r].data[c],
-               r: `<t>${schedule[r].data[c]}</t>`,
+               h: schedule[i].data[j],
+               r: `<t>${schedule[i].data[j]}</t>`,
                t: 's',
-               v: schedule[r].data[c],
-               w: schedule[r].data[c],
+               v: schedule[i].data[j],
+               w: schedule[i].data[j],
          };
       }
    }
-
-   new_workbook.Sheets[config.schedule_sheet]['A1'].v = "New Value" // assign new value
-   new_workbook.Sheets[config.schedule_sheet]['B1'].v = "Also New Value" // assign new value
-
    XLSX.writeFile(new_workbook, res_file_name) // write the same workbook with new values
 }
 
