@@ -100,7 +100,7 @@ function create_schedule() {
    let schedule = schedule_map()
    let sites = sites_data();
    let sites_days = schedule[0].data.map((_, i) => sites.reduce(function (map, site) {
-      let day = (i + config.starting_day - 1) % 7 + 1
+      let day = (i + config.schedule_starting_day - 1) % 7 + 1
       map[site.id] = {
          max: site.days[0] <= day && site.days[1] >= day ? site.max_workers : 0,
          current: 0,
@@ -156,25 +156,27 @@ function create_schedule() {
 
 function add_schedule_to_xlsx(schedule) {
    const res_file_name = './result.xlsx';
-   fs.copyFile(config.file_name, res_file_name);
+   fs.copyFile(config.file_name, res_file_name, (err) => {
+      if (err) throw err;
+      console.log('OG workbook was copied');
+   });
 
    const new_workbook = XLSX.readFile(res_file_name);
 
-   for (let r = config.names_id[0].r; r <= config.names_id[1].r; r++) {
-      let i = r - config.names_id[0].r;
-      for (let c = config.days_id[0].c; c <= config.days_id[1].c; c++) {
-         let j = c - config.days_id[0].c;
+   for (let r = config.names_id[0].r, i = 0; r <= config.names_id[1].r; r++, i++) {
+      for (let c = config.days_id[0].c, j = 0; c <= config.days_id[1].c; c++, j++) {
          let cell_id = XLSX.utils.encode_cell({ r: r, c: c })
 
          new_workbook.Sheets[config.schedule_sheet_name][cell_id] = {
                h: schedule[i].data[j],
-               r: `<t>${schedule[i].data[j]}</t>`,
+               r: `<t>${schedule[j].data[j]}</t>`,
                t: 's',
                v: schedule[i].data[j],
                w: schedule[i].data[j],
          };
       }
    }
+
    XLSX.writeFile(new_workbook, res_file_name) // write the same workbook with new values
 }
 
